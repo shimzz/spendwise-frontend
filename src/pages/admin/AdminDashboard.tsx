@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/layout/Layout";
+import AdminLayout from "@/components/layout/AdminLayout";
 import api from "@/lib/api";
 import { Loader2, ShieldAlert } from "lucide-react";
-// Components Import karein
 import AdminStats from "./AdminStats";
 import UsersTable from "./UsersTable";
 
@@ -14,53 +13,61 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
+  const fetchAdminData = async () => {
+    try {
+      const [usersRes, statsRes] = await Promise.all([
+        api.get("/admin/users"),
+        api.get("/admin/stats"),
+      ]);
+      setUsers(usersRes.data);
+      setStats(statsRes.data);
+    } catch (error) {
+      console.error("Admin fetch error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAdminData = async () => {
-      try {
-        const [usersRes, statsRes] = await Promise.all([
-          api.get("/admin/users"),
-          api.get("/admin/stats"),
-        ]);
-        setUsers(usersRes.data);
-        setStats(statsRes.data);
-      } catch (error) {
-        console.error("Admin fetch error", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAdminData();
   }, []);
 
+  const handleDeleteUser = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      await api.delete(`/admin/users/${id}`);
+      fetchAdminData();
+    } catch (error) {
+      alert("Failed to delete user");
+    }
+  };
+
   if (loading) {
     return (
-      <Layout>
+      <AdminLayout>
         <div className="flex h-[80vh] items-center justify-center">
           <Loader2 className="animate-spin text-[#5C4EE5] h-10 w-10" />
         </div>
-      </Layout>
+      </AdminLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className="space-y-8 max-w-7xl mx-auto">
-        {/* Header */}
+    <AdminLayout>
+      {/* Yahan w-full space-y-8 hai, koi mx-auto ya max-w nahi hai */}
+      <div className="w-full space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors">
             <ShieldAlert className="text-[#5C4EE5]" /> Admin Control Panel
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1 transition-colors">
             Manage users and view system statistics.
           </p>
         </div>
 
-        {/* Stats Component */}
         <AdminStats stats={stats} />
-
-        {/* Users Table Component */}
-        <UsersTable users={users} />
+        <UsersTable users={users} onDelete={handleDeleteUser} />
       </div>
-    </Layout>
+    </AdminLayout>
   );
 }

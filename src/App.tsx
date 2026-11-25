@@ -3,16 +3,18 @@ import AppRoutes from "./app-routes/index";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "sonner"; // <--- Import karein
+import { CurrencyProvider } from "./context/CurrencyContext";
 
 function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <AppRoutes />
-          <Toaster position="top-right" richColors />{" "}
-          {/* <--- Yahan add karein */}
-        </AuthProvider>
+        <CurrencyProvider>
+          <AuthProvider>
+            <AppRoutes />
+            <Toaster position="top-right" richColors />{" "}
+          </AuthProvider>
+        </CurrencyProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

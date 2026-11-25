@@ -1,9 +1,8 @@
 import path from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -11,7 +10,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    include: ["recharts"],
+  // YEH NAYA HISSA ADD KAREIN
+  server: {
+    host: true,
+    allowedHosts: true, // Kisi bhi public link se access ki ijazat dega
   },
 });

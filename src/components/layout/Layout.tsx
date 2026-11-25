@@ -1,78 +1,71 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Wallet,
   LayoutDashboard,
   Receipt,
   PieChart,
   ShieldAlert,
-  Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "./Navbar";
 
-interface LayoutProps {
-  children?: ReactNode;
-}
-
-const userNav = [
-  {
-    name: "Dashboard",
-    path: "/dashboard",
-    icon: <LayoutDashboard size={20} />,
-  },
-  {
-    name: "Transactions",
-    path: "/transactions",
-    icon: <Receipt size={20} />,
-  },
-  { name: "Budget", path: "/budget", icon: <PieChart size={20} /> },
-];
-
-const adminNav = [
-  { name: "Overview", path: "/admin", icon: <ShieldAlert size={20} /> },
-  { name: "Users", path: "/admin/users", icon: <Users size={20} /> },
-];
-
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { user } = useAuth();
 
-  const navItems = user?.role === "admin" ? adminNav : userNav;
+  // User ke asal links
+  const navItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+    },
+    {
+      name: "Transactions",
+      path: "/transactions",
+      icon: <Receipt size={20} />,
+    },
+    { name: "Budget", path: "/budget", icon: <PieChart size={20} /> },
+  ];
+
+  // Agar user Admin hai, toh usko Admin Panel ka link bhi dikhao
+  if (user?.role === "admin") {
+    navItems.push({
+      name: "Admin Panel",
+      path: "/admin",
+      icon: <ShieldAlert size={20} />,
+    });
+  }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans dark:bg-slate-950">
+    <div className="flex h-screen bg-[#F8FAFC] dark:bg-slate-950 w-full overflow-hidden font-sans transition-colors">
       {/* Sidebar */}
-      <aside className="hidden w-[260px] shrink-0 flex-col justify-between bg-[#0F172A] py-6 text-white md:flex">
+      <div className="w-[260px] bg-[#0F172A] text-white flex flex-col justify-between py-6 shrink-0 border-r border-slate-800">
         <div>
-          <div className="mb-10 flex items-center gap-3 px-6">
-            <div className="rounded-xl bg-[#5C4EE5] p-2">
+          <div className="flex items-center gap-3 px-6 mb-10">
+            <div className="bg-[#5C4EE5] p-2 rounded-xl">
               <Wallet size={24} className="text-white" />
             </div>
-            <Link to="/">
-              <span className="text-xl font-bold tracking-wide text-white">
-                SpendWise
-              </span>
-            </Link>
+            <div
+              className="text-xl font-bold tracking-wide"
+              style={{ color: "#ffffff" }}
+            >
+              SpendWise
+            </div>
           </div>
 
           <nav className="flex flex-col gap-2 px-4">
             {navItems.map((item) => {
-              // "/admin" should only be active on the exact path,
-              // otherwise it stays highlighted on /admin/users too
-              const isActive =
-                item.path === "/admin"
-                  ? location.pathname === "/admin"
-                  : location.pathname.startsWith(item.path);
-
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
-                      ? "bg-[#5C4EE5] font-medium text-white shadow-md shadow-indigo-500/20"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
+                      ? "bg-[#5C4EE5] text-white font-medium shadow-md shadow-indigo-500/20"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   {item.icon}
@@ -82,12 +75,12 @@ export default function Layout({ children }: LayoutProps) {
             })}
           </nav>
         </div>
-      </aside>
+      </div>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-y-auto">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-y-auto">
         <Navbar />
-        <main className="w-full p-6 md:p-8">{children ?? <Outlet />}</main>
+        <main className="p-6 md:p-8 w-full">{children}</main>
       </div>
     </div>
   );

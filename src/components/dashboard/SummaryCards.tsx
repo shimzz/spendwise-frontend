@@ -1,4 +1,5 @@
 import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface SummaryProps {
   income: number;
@@ -11,6 +12,7 @@ export default function SummaryCards({
   expense,
   balance,
 }: SummaryProps) {
+  const { currency } = useCurrency();
   const summaryData = [
     {
       title: "Total Income",
@@ -50,8 +52,8 @@ export default function SummaryCards({
               {item.title}
             </p>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1 flex items-center gap-1 whitespace-nowrap">
-              <span className="text-lg text-gray-500 dark:text-slate-400 font-medium">
-                PKR
+              <span className="text-lg text-gray-500 font-medium">
+                {currency}
               </span>{" "}
               {item.amount.toLocaleString()}
             </h3>

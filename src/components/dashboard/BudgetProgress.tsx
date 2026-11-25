@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Wallet } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext"; // <--- Import karein
 
 interface BudgetProgressProps {
   budgetAmount: number;
@@ -12,6 +13,8 @@ export default function BudgetProgress({
   totalExpense,
   totalIncome = 0,
 }: BudgetProgressProps) {
+  const { currency } = useCurrency(); // <--- Hook use karein
+
   const remaining = budgetAmount - totalExpense;
   const progressPercentage =
     budgetAmount > 0 ? Math.min((totalExpense / budgetAmount) * 100, 100) : 0;
@@ -43,14 +46,14 @@ export default function BudgetProgress({
 
   return (
     <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl dark:shadow-none h-full flex flex-col justify-center min-h-[300px] transition-colors">
-      {/* Header with Income Badge */}
       <div className="flex justify-between items-start mb-8">
         <h2 className="text-xl font-bold text-slate-800 dark:text-white mt-1">
           Budget Progress
         </h2>
+        {/* Dynamic Currency */}
         <div className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
           <Wallet size={16} />
-          Income: PKR {totalIncome.toLocaleString()}
+          Income: {currency} {totalIncome.toLocaleString()}
         </div>
       </div>
 
@@ -60,16 +63,18 @@ export default function BudgetProgress({
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1 font-medium">
               Spent
             </p>
+            {/* Dynamic Currency */}
             <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-              PKR {totalExpense.toLocaleString()}
+              {currency} {totalExpense.toLocaleString()}
             </h3>
           </div>
           <div className="text-right">
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1 font-medium">
               Budget
             </p>
+            {/* Dynamic Currency */}
             <h3 className="text-2xl font-bold text-slate-700 dark:text-slate-300">
-              PKR {budgetAmount.toLocaleString()}
+              {currency} {budgetAmount.toLocaleString()}
             </h3>
           </div>
         </div>
@@ -108,8 +113,9 @@ export default function BudgetProgress({
             )}{" "}
             {isOverBudget ? "Over Budget By" : "Remaining"}
           </span>
+          {/* Dynamic Currency */}
           <span className="font-extrabold text-lg">
-            PKR {Math.abs(remaining).toLocaleString()}
+            {currency} {Math.abs(remaining).toLocaleString()}
           </span>
         </div>
       </div>

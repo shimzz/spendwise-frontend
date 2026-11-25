@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useCurrency } from "@/context/CurrencyContext"; // <--- Import karein
 
 interface TableProps {
   transactions: Transaction[];
@@ -30,7 +31,7 @@ export default function TransactionTable({
   onDelete,
   onEdit,
 }: TableProps) {
-  // State for viewing full description
+  const { currency } = useCurrency(); // <--- Hook use karein
   const [selectedDescription, setSelectedDescription] = useState<string | null>(
     null,
   );
@@ -114,7 +115,6 @@ export default function TransactionTable({
                       </span>
                     </td>
 
-                    {/* Description Column */}
                     <td className="px-6 py-4 max-w-[150px] md:max-w-[200px]">
                       {tx.description ? (
                         <div
@@ -128,7 +128,6 @@ export default function TransactionTable({
                             size={14}
                             className="shrink-0 opacity-50 group-hover:opacity-100"
                           />
-                          {/* Truncate text with ellipsis */}
                           <span className="truncate block">
                             {tx.description}
                           </span>
@@ -148,10 +147,11 @@ export default function TransactionTable({
                       })}
                     </td>
 
+                    {/* Yahan Dynamic Currency lagayi hai */}
                     <td
                       className={`px-6 py-4 text-right font-extrabold text-lg ${tx.type === "income" ? "text-emerald-500 dark:text-emerald-400" : "text-slate-800 dark:text-slate-200"}`}
                     >
-                      {tx.type === "income" ? "+" : "-"} PKR{" "}
+                      {tx.type === "income" ? "+" : "-"} {currency}{" "}
                       {tx.amount.toLocaleString()}
                     </td>
 
@@ -181,7 +181,6 @@ export default function TransactionTable({
         </div>
       </div>
 
-      {/* Description View Dialog (Modal) */}
       <Dialog
         open={!!selectedDescription}
         onOpenChange={(open) => !open && setSelectedDescription(null)}

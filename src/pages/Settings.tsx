@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import Layout from "@/components/layout/Layout";
 import { motion } from "framer-motion";
 import {
@@ -9,18 +11,52 @@ import {
   Bell,
   Globe,
   ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
+  const { currency, setCurrency } = useCurrency();
+  const { logout } = useAuth();
 
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [budgetAlerts, setBudgetAlerts] = useState(true);
 
+  // Delete Account States
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      await api.delete("/auth/delete-account");
+
+      toast.success("Account deleted successfully. Goodbye!");
+      setTimeout(() => {
+        logout(); // Account delete hone ke baad logout
+      }, 1500);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete account");
+      setDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Layout>
-      {/* Yahan max-w-4xl aur mx-auto hata diya hai */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -35,7 +71,6 @@ export default function Settings() {
           </p>
         </div>
 
-        {/* Grid Layout taake screen par ache se phaile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Appearance Settings */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl p-6 md:p-8 transition-colors">
@@ -82,7 +117,11 @@ export default function Settings() {
                   Set your primary currency for tracking.
                 </p>
               </div>
-              <select className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:ring-2 focus:ring-[#5C4EE5]">
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:ring-2 focus:ring-[#5C4EE5]"
+              >
                 <option value="PKR">PKR - Pakistani Rupee</option>
                 <option value="USD">USD - US Dollar</option>
                 <option value="EUR">EUR - Euro</option>
@@ -91,12 +130,11 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Notifications Settings (Yeh full width lega) */}
+          {/* Notifications Settings */}
           <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl p-6 md:p-8 transition-colors">
             <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
               <Bell size={20} /> Notifications
             </h2>
-
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -114,7 +152,6 @@ export default function Settings() {
                   className="w-6 h-6 accent-[#5C4EE5] cursor-pointer"
                 />
               </div>
-
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-6">
                 <div>
                   <p className="font-semibold text-slate-700 dark:text-slate-300">
@@ -134,21 +171,61 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Danger Zone (Yeh bhi full width lega) */}
+          {/* Danger Zone */}
           <div className="lg:col-span-2 bg-rose-50 dark:bg-rose-500/5 rounded-3xl border border-rose-200 dark:border-rose-500/20 shadow-xl p-6 md:p-8 transition-colors">
             <h2 className="text-lg font-bold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-2">
               <ShieldAlert size={20} /> Danger Zone
             </h2>
             <p className="text-sm text-rose-500/80 dark:text-rose-400/80 mb-6">
-              Once you delete your account, there is no going back. Please be
-              certain.
+              Once you delete your account, there is no going back. All your
+              transactions and budgets will be permanently deleted.
             </p>
-            <Button className="bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl h-12 px-6">
+            <Button
+              onClick={() => setShowDeleteDialog(true)}
+              className="bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl h-12 px-6"
+            >
               Delete Account
             </Button>
           </div>
         </div>
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Are you absolutely sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 dark:text-slate-400">
+              This action cannot be undone. This will permanently delete your
+              account and remove all your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel
+              disabled={deleting}
+              className="border-slate-200 dark:border-slate-700"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteAccount();
+              }}
+              disabled={deleting}
+              className="bg-rose-500 hover:bg-rose-600 text-white"
+            >
+              {deleting ? (
+                <Loader2 className="animate-spin h-5 w-5" />
+              ) : (
+                "Yes, Delete Account"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }

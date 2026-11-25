@@ -10,11 +10,14 @@ import BudgetProgress from "@/components/dashboard/BudgetProgress";
 import { getBudget, setBudget } from "@/services/budgetService";
 import { fetchTransactions } from "@/services/transactionService";
 import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext"; // <--- Import karein
 
 export default function Budget() {
+  const { currency } = useCurrency(); // <--- Hook use karein
+
   const [budgetAmount, setBudgetAmount] = useState<number>(0);
   const [totalExpense, setTotalExpense] = useState<number>(0);
-  const [totalIncome, setTotalIncome] = useState<number>(0); // Naya state income ke liye
+  const [totalIncome, setTotalIncome] = useState<number>(0);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,7 +63,6 @@ export default function Budget() {
         setActivePeriod(null);
       }
 
-      // Transactions fetch karein aur date range ke hisaab se filter karein
       const transactions = await fetchTransactions();
 
       let monthlyExpense = 0;
@@ -163,8 +165,9 @@ export default function Budget() {
 
             <form onSubmit={handleSetBudget} className="space-y-5">
               <div className="space-y-2">
+                {/* Dynamic Currency Label */}
                 <Label className="text-slate-700 dark:text-slate-300 font-semibold">
-                  Budget Amount (PKR)
+                  Budget Amount ({currency})
                 </Label>
                 <Input
                   type="number"
@@ -218,7 +221,6 @@ export default function Budget() {
             </form>
           </div>
 
-          {/* Progress Card with Income */}
           <BudgetProgress
             budgetAmount={budgetAmount}
             totalExpense={totalExpense}

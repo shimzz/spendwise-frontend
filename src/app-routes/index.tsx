@@ -11,6 +11,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings"; // <-- 'S' capital hona chahiye
+import AdminSettings from "@/pages/admin/AdminSetting";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +34,8 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute adminOnly />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+
+        <Route path="/admin/settings" element={<AdminSettings />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
