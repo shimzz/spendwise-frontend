@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -16,7 +16,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme(); // Theme state nikali
-  const navigate = useNavigate();
 
   const adminNavItems = [
     { name: "Overview", path: "/admin", icon: <LayoutDashboard size={20} /> },
